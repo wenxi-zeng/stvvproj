@@ -85,10 +85,13 @@ public class AutoCoverageAgent {
             }
 
             NodeList pluginManagements = node.getChildNodes();
+            Node pluginManagementRef = null;
+            Node pluginsRef = null;
             for (int i = 0; i < pluginManagements.getLength(); i++) {
                 Node pluginManagement = pluginManagements.item(i);
 
                 if (pluginManagement.getNodeName().equals("pluginManagement")) {
+                    pluginManagementRef = pluginManagement;
                     NodeList plugins = pluginManagement.getChildNodes();
                     for (int j = 0; j < pluginManagements.getLength(); j++) {
                         if(updatePlugin(doc, plugins.item(j).getChildNodes(), pomPath))
@@ -96,9 +99,23 @@ public class AutoCoverageAgent {
                     }
                 }
                 else if (pluginManagement.getNodeName().equals("plugins")) {
+                    pluginsRef = pluginManagement;
                     if(updatePlugin(doc, pluginManagement.getChildNodes(), pomPath))
                         return;
                 }
+            }
+
+            if (pluginManagementRef != null) {
+                Node plugins = doc.createElement("plugins");
+                Node plugin = createMavenPlugin(doc);
+                plugins.appendChild(plugin);
+                pluginManagementRef.appendChild(plugins);
+                save(doc, pomPath);
+            }
+            else if (pluginsRef != null) {
+                Node plugin = createMavenPlugin(doc);
+                pluginsRef.appendChild(plugin);
+                save(doc, pomPath);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,21 +138,7 @@ public class AutoCoverageAgent {
                         catch (DOMException ignored) {}
                     }
 
-                    Node newConfig = doc.createElement("configuration");
-                    Node argLine = doc.createElement("argLine");
-                    argLine.setTextContent("-javaagent:" + getFilePath());
-                    Node properties = doc.createElement("properties");
-                    Node property = doc.createElement("property");
-                    Node name = doc.createElement("name");
-                    name.setTextContent("listener");
-                    Node value = doc.createElement("value");
-                    value.setTextContent("edu.utdallas.group9.JUnitListener");
-
-                    property.appendChild(name);
-                    property.appendChild(value);
-                    properties.appendChild(property);
-                    newConfig.appendChild(argLine);
-                    newConfig.appendChild(properties);
+                    Node newConfig = generateNewEntry(doc);
                     eElement.appendChild(newConfig);
                     save(doc, path);
                     return true;
@@ -144,6 +147,39 @@ public class AutoCoverageAgent {
         }
 
         return false;
+    }
+
+    private static Node createMavenPlugin(Document doc) {
+        Node plugin = doc.createElement("plugin");
+        Node groupId = doc.createElement("groupId");
+        Node artifactId = doc.createElement("artifactId");
+        groupId.setTextContent("org.apache.maven.plugins");
+        artifactId.setTextContent("maven-surefire-plugin");
+        Node newConfig = generateNewEntry(doc);
+        plugin.appendChild(groupId);
+        plugin.appendChild(artifactId);
+        plugin.appendChild(newConfig);
+
+        return plugin;
+    }
+
+    private static Node generateNewEntry(Document doc) {
+        Node newConfig = doc.createElement("configuration");
+        Node argLine = doc.createElement("argLine");
+        argLine.setTextContent("-javaagent:" + getFilePath());
+        Node properties = doc.createElement("properties");
+        Node property = doc.createElement("property");
+        Node name = doc.createElement("name");
+        name.setTextContent("listener");
+        Node value = doc.createElement("value");
+        value.setTextContent("edu.utdallas.group9.JUnitListener");
+
+        property.appendChild(name);
+        property.appendChild(value);
+        properties.appendChild(property);
+        newConfig.appendChild(argLine);
+        newConfig.appendChild(properties);
+        return newConfig;
     }
 
     private static void save(Document doc, String filepath) throws Exception {
