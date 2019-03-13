@@ -6,21 +6,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Paths;
 
 
@@ -32,16 +25,14 @@ public class AutoCoverageAgent {
             return;
         }
 
-//        String repoPath = downloadRepo(args[0]);
-//
-//        if (repoPath == null) {
-//            System.out.println("Failed to download repo");
-//            return;
-//        }
-        String repoUrl = args[0];
-        String dir = repoUrl.substring(repoUrl.lastIndexOf('/') + 1);
-        String cloneDirectoryPath = "downloads" + File.separator + dir;
-        modifyPom(cloneDirectoryPath);
+        String repoPath = downloadRepo(args[0]);
+
+        if (repoPath == null) {
+            System.out.println("Failed to download repo");
+            return;
+        }
+
+        modifyPom(repoPath);
     }
 
     private static String downloadRepo(String repoUrl) {
@@ -78,14 +69,16 @@ public class AutoCoverageAgent {
             for (int i = 0; i < pluginManagements.getLength(); i++) {
                 Node pluginManagement = pluginManagements.item(i);
 
-                if (pluginManagement.getTextContent().equals("pluginManagement")) {
+                if (pluginManagement.getNodeName().equals("pluginManagement")) {
                     NodeList plugins = pluginManagement.getChildNodes();
                     for (int j = 0; j < pluginManagements.getLength(); j++) {
-                        updatePlugin(doc, plugins.item(j).getChildNodes(), repoPath + File.separator + "pom.xml");
+                        if(updatePlugin(doc, plugins.item(j).getChildNodes(), repoPath + File.separator + "pom.xml"))
+                            return;
                     }
                 }
-                else if (pluginManagement.getTextContent().equals("plugins")) {
-                    updatePlugin(doc, pluginManagement.getChildNodes(), repoPath + File.separator + "pom.xml");
+                else if (pluginManagement.getNodeName().equals("plugins")) {
+                    if(updatePlugin(doc, pluginManagement.getChildNodes(), repoPath + File.separator + "pom.xml"))
+                        return;
                 }
             }
         } catch (Exception e) {
@@ -93,7 +86,7 @@ public class AutoCoverageAgent {
         }
     }
 
-    private static void updatePlugin(Document doc, NodeList plugins, String path) throws Exception {
+    private static boolean updatePlugin(Document doc, NodeList plugins, String path) throws Exception {
         for (int j = 0; j < plugins.getLength(); j++) {
             Node plugin = plugins.item(j);
             if (plugin.getNodeType() == Node.ELEMENT_NODE) {
@@ -107,22 +100,25 @@ public class AutoCoverageAgent {
 
                     Node newConfig = doc.createElement("configuration");
                     Node argLine = doc.createElement("argLine");
-                    argLine.setNodeValue("-javaagent:[path-to-your-agent.jar]");
+                    argLine.setTextContent("-javaagent:[path-to-your-agent.jar]");
                     Node properties = doc.createElement("properties");
                     Node property = doc.createElement("property");
                     Node name = doc.createElement("name");
-                    name.setNodeValue("listener");
+                    name.setTextContent("listener");
                     Node value = doc.createElement("value");
-                    value.setNodeValue("[YourListener]");
+                    value.setTextContent("[YourListener]");
 
                     property.appendChild(name).appendChild(value);
                     properties.appendChild(property);
                     newConfig.appendChild(argLine).appendChild(properties);
                     eElement.appendChild(newConfig);
                     save(doc, path);
+                    return true;
                 }
             }
         }
+
+        return false;
     }
 
     private static void save(Document doc, String filepath) throws Exception {
