@@ -12,7 +12,7 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
 	int line;
 	
     public MethodTransformVisitor(final MethodVisitor mv, String name) {
-        super(ASM5, mv);
+        super(Opcodes.ASM5, mv);
         this.mName=name;
     }
 
@@ -36,8 +36,8 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
     }
 
     private void print(String message) {
-        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
         mv.visitLdcInsn(message);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
     }
  }

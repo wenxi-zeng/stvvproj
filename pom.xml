@@ -6,23 +6,18 @@
 
     <groupId>edu.utdallas.group9</groupId>
     <artifactId>cs6367</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-
+    <modules>
+        <module>AutoCoverageAgent</module>
+        <module>Agent</module>
+    </modules>
     <dependencies>
         <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>5.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.2.1.201812262042-r</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
