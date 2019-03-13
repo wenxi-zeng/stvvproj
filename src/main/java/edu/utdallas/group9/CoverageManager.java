@@ -1,7 +1,9 @@
 package edu.utdallas.group9;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 public final class CoverageManager {
 
@@ -12,7 +14,7 @@ public final class CoverageManager {
     private List<String> currentOutputs;
 
     private CoverageManager() {
-        hm = new HashMap<String, List<String>>();
+        hm = new HashMap<>();
     }
 
     public static CoverageManager getInstance() {
@@ -40,12 +42,12 @@ public final class CoverageManager {
     }
 
     public void addCase(String caseName) {
-        currentOutputs = new LinkedList<String>();
+        currentOutputs = new LinkedList<>();
         hm.put(caseName, currentOutputs);
     }
 
     public List<String> getCaseNames() {
-        return hm.keySet();
+        return new ArrayList<>(hm.keySet());
     }
 
     public List<String> getOutputMsgs(String caseName) {
