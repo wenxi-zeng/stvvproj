@@ -25,14 +25,13 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
 
     @Override
     public void visitLineNumber(int i, Label label) {
-        line =i;
-        print("line " + line + " executed");
         super.visitLineNumber(i, label);
+        line = i;
+        CoverageManager.getInstance().addStatementCoverage(mName, i);
     }
 
     @Override
     public void visitLabel(Label label) {
-        print("line " + line + " executed");
         super.visitLabel(label);
     }
 
