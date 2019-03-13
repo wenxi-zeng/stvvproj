@@ -25,8 +25,14 @@ public class JUnitListener extends RunListener {
     @Override
     public void testRunFinished(Result result) throws Exception {
         super.testRunFinished(result);
-        String logPath = "logs/" + manager.getProgramName() + ".txt";
+        String dir = "logs";
+        String logPath = dir + File.separator + manager.getProgramName() + ".txt";
         try {
+            File directory = new File(dir);
+            if (! directory.exists()){
+                directory.mkdir();
+            }
+
             File file = new File(logPath);
             if (!file.exists())
                 file.createNewFile();
