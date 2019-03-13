@@ -2,6 +2,8 @@ package edu.utdallas.group9;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -16,8 +18,10 @@ public class Agent {
         String packageName = getPackgeName();
         if (packageName == null)
             System.out.println("Failed to read package name from pom.xml");
-        else
+        else {
+            CoverageManager.getInstance().setProgramName(packageName);
             inst.addTransformer(new ClassTransformer(packageName));
+        }
     }
 
     private static String getPackgeName() {
@@ -27,8 +31,22 @@ public class Agent {
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
             doc.getDocumentElement().normalize();
-            Element node = doc.getElementById("groupId");
-            return node.getTextContent();
+
+            NodeList nodeList = doc.getFirstChild().getChildNodes();
+            if (nodeList == null || nodeList.getLength() == 0) return null;
+            Node node = null;
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                if (nodeList.item(i).getNodeName().equals("groupId")) {
+                    node = nodeList.item(i);
+                    break;
+                }
+            }
+            if (node == null) return null;
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element)node;
+                return element.getTextContent();
+            }
+            return null;
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (IOException e) {
