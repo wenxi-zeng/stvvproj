@@ -42,7 +42,6 @@ public class JUnitListener extends RunListener {
                 sb.append(caseName + "\n");
                 for (String outPutMsg : manager.getOutputMsgs(caseName)) {
                     sb.append(outPutMsg);
-                    sb.append("\n");
                 }
             }
             bw.write(sb.toString());

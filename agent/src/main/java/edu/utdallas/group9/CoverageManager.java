@@ -2,7 +2,6 @@ package edu.utdallas.group9;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public final class CoverageManager {
@@ -30,7 +29,7 @@ public final class CoverageManager {
     }
 
     public void addStatementCoverage(String className, int lineNumber) {
-        currentOutputs.add(className + ":" + Integer.toString(lineNumber) + "\n");
+        currentOutputs.add(programName + "." + className + ":" + Integer.toString(lineNumber) + "\n");
     }
 
     public static void newStatementCoverage(String className, int lineNumber) {
@@ -46,8 +45,8 @@ public final class CoverageManager {
     }
 
     public void addCase(String caseName) {
-        currentOutputs = new LinkedList<>();
-        hm.put(caseName, currentOutputs);
+        hm.put(caseName, new ArrayList<>());
+        currentOutputs = hm.get(caseName);
     }
 
     public List<String> getCaseNames() {

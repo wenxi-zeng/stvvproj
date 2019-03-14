@@ -1,6 +1,5 @@
 package edu.utdallas.group9;
 
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -16,32 +15,22 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
         this.mName = name;
     }
 
-    // method coverage collection
-    @Override
-    public void visitCode() {
-        print(mName + " executed");
-        super.visitCode();
-    }
-
     @Override
     public void visitLineNumber(int i, Label label) {
         this.line = i;
-
-        mv.visitLdcInsn(mName);
-        mv.visitLdcInsn(new Integer(i));
-        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-        mv.visitMethodInsn(INVOKESTATIC, "edu/utdallas/group9/CoverageManager", "newStatementCoverage", "(Ljava/lang/String;Ljava/lang/Integer;)V", false);
+        record(i);
         super.visitLineNumber(i, label);
     }
 
     @Override
     public void visitLabel(Label label) {
+        record(line);
         super.visitLabel(label);
     }
 
-    private void print(String message) {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-        mv.visitLdcInsn(message);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+    private void record(int line) {
+        mv.visitLdcInsn(mName);
+        mv.visitLdcInsn(new Integer(line));
+        mv.visitMethodInsn(INVOKESTATIC, "edu/utdallas/group9/CoverageManager", "newStatementCoverage", "(Ljava/lang/String;I)V", false);
     }
 }
