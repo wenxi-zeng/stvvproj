@@ -209,22 +209,26 @@ public class AutoCoverageAgent {
                 NodeList version = eElement.getElementsByTagName("version");
 
                 if (groupId.item(0).getTextContent().contains("junit")) {
-                    String versionNum = version.item(0).getTextContent().substring(0, 1);
-                    int ver = Integer.valueOf(versionNum);
-                    if (ver < 4) {
-                        NodeList versionElement = eElement.getElementsByTagName("version");
-                        if (versionElement != null && versionElement.getLength() > 0) {
-                            try {
-                                eElement.removeChild(versionElement.item(0));
+                    try {
+                        String versionNum = version.item(0).getTextContent().substring(0, 1);
+                        int ver = Integer.valueOf(versionNum);
+                        if (ver < 4) {
+                            NodeList versionElement = eElement.getElementsByTagName("version");
+                            if (versionElement != null && versionElement.getLength() > 0) {
+                                try {
+                                    eElement.removeChild(versionElement.item(0));
+                                } catch (DOMException ignored) {
+                                }
                             }
-                            catch (DOMException ignored) {}
-                        }
 
-                        Node newVersion = doc.createElement("version");
-                        newVersion.setTextContent("4.12");
-                        eElement.appendChild(newVersion);
+                            Node newVersion = doc.createElement("version");
+                            newVersion.setTextContent("4.12");
+                            eElement.appendChild(newVersion);
+                        }
+                        break;
+                    } catch (Exception ignored) {
+                        return;
                     }
-                    break;
                 }
             }
         }
