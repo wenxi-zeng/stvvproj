@@ -69,7 +69,14 @@ public class AutoCoverageAgent {
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
             doc.getDocumentElement().normalize();
-            NodeList nodeList = doc.getFirstChild().getChildNodes();
+            NodeList rootList = doc.getChildNodes();
+            NodeList nodeList = null;
+            for (int i = 0; i < rootList.getLength(); i++) {
+                if (rootList.item(i).getNodeName().equals("project")) {
+                    nodeList = rootList.item(i).getChildNodes();
+                    break;
+                }
+            }
             if (nodeList == null || nodeList.getLength() == 0) return;
             Node node = null;
             for (int i = 0; i < nodeList.getLength(); i++) {
@@ -84,6 +91,7 @@ public class AutoCoverageAgent {
                 return;
             }
 
+            checkJUnitVersion(nodeList, doc);
             NodeList pluginManagements = node.getChildNodes();
             Node pluginManagementRef = null;
             Node pluginsRef = null;
@@ -93,7 +101,7 @@ public class AutoCoverageAgent {
                 if (pluginManagement.getNodeName().equals("pluginManagement")) {
                     pluginManagementRef = pluginManagement;
                     NodeList plugins = pluginManagement.getChildNodes();
-                    for (int j = 0; j < pluginManagements.getLength(); j++) {
+                    for (int j = 0; j < plugins.getLength(); j++) {
                         if(updatePlugin(doc, plugins.item(j).getChildNodes(), pomPath))
                             return;
                     }
@@ -125,7 +133,7 @@ public class AutoCoverageAgent {
     private static boolean updatePlugin(Document doc, NodeList plugins, String path) throws Exception {
         for (int j = 0; j < plugins.getLength(); j++) {
             Node plugin = plugins.item(j);
-            //nodeToString(plugin);
+            nodeToString(plugin);
             if (plugin.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) plugin;
                 NodeList artifacts = eElement.getElementsByTagName("artifactId");
@@ -180,6 +188,45 @@ public class AutoCoverageAgent {
         newConfig.appendChild(argLine);
         newConfig.appendChild(properties);
         return newConfig;
+    }
+
+    private static void checkJUnitVersion(NodeList nodeList, Document doc) {
+        NodeList dependencies = null;
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            if (nodeList.item(i).getNodeName().equals("dependencies")) {
+                dependencies = nodeList.item(i).getChildNodes();
+                break;
+            }
+        }
+        if (dependencies == null || dependencies.getLength() == 0) return;
+
+        for (int i = 0; i < dependencies.getLength(); i++) {
+            Node dependency = dependencies.item(i);
+            if (dependency.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = (Element) dependency;
+                NodeList groupId = eElement.getElementsByTagName("groupId");
+                NodeList version = eElement.getElementsByTagName("version");
+
+                if (groupId.item(0).getTextContent().contains("junit")) {
+                    String versionNum = version.item(0).getTextContent().substring(0, 1);
+                    int ver = Integer.valueOf(versionNum);
+                    if (ver < 4) {
+                        NodeList versionElement = eElement.getElementsByTagName("version");
+                        if (versionElement != null && versionElement.getLength() > 0) {
+                            try {
+                                eElement.removeChild(versionElement.item(0));
+                            }
+                            catch (DOMException ignored) {}
+                        }
+
+                        Node newVersion = doc.createElement("version");
+                        newVersion.setTextContent("4.12");
+                        eElement.appendChild(newVersion);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private static void save(Document doc, String filepath) throws Exception {
