@@ -29,8 +29,12 @@ public final class CoverageManager {
         return instance;
     }
 
-    public static void addStatementCoverage(String className, int lineNumber) {
+    public void addStatementCoverage(String className, int lineNumber) {
         currentOutputs.add(className + ":" + Integer.toString(lineNumber) + "\n");
+    }
+
+    public static void newStatementCoverage(String className, int lineNumber) {
+        CoverageManager.getInstance().addStatementCoverage(className, lineNumber);
     }
 
     public void setProgramName(String name) {
