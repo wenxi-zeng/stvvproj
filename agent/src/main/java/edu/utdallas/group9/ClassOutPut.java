@@ -17,7 +17,11 @@ public class ClassOutPut implements Comparable<ClassOutPut> {
 
     @Override
     public int compareTo(ClassOutPut o) {
-        return this.lineNumber - o.lineNumber;
+        int classNameCompare = this.className.compareTo(o.className);
+        if (classNameCompare == 0)
+            return this.lineNumber - o.lineNumber;
+        else
+            return classNameCompare;
     }
 
     @Override

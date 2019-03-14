@@ -35,9 +35,8 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
     }
 
     private void record(int line) {
-        if (!visitedLines.add(line)) return;
-        if (mName.contains("<")) return;
-        String temp = className + "." + mName;
+        if (line == 0) return;
+        String temp = className;
         mv.visitLdcInsn(temp);
         mv.visitLdcInsn(new Integer(line));
         mv.visitMethodInsn(INVOKESTATIC, "edu/utdallas/group9/CoverageManager", "newStatementCoverage", "(Ljava/lang/String;I)V", false);
