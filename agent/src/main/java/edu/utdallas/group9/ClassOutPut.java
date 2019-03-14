@@ -3,18 +3,16 @@ package edu.utdallas.group9;
 import java.lang.Comparable;
 
 public class ClassOutPut implements Comparable<ClassOutPut> {
-    private String programName;
     private String className;
     private int lineNumber;
 
-    public ClassOutPut(String programName, String className, int lineNumber) {
-        this.programName = programName;
+    public ClassOutPut(String className, int lineNumber) {
         this.className = className;
         this.lineNumber = lineNumber;
     }
 
     public String getOutPutMsg() {
-        return programName + "." + className + ":" + lineNumber + "\n";
+        return className + ":" + lineNumber + "\n";
     }
 
     @Override

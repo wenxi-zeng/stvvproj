@@ -30,7 +30,7 @@ public final class CoverageManager {
     }
 
     public void addStatementCoverage(String className, int lineNumber) {
-        currentOutputs.add(new ClassOutPut(programName, className, lineNumber));
+        currentOutputs.add(new ClassOutPut(className, lineNumber));
     }
 
     public static void newStatementCoverage(String className, int lineNumber) {

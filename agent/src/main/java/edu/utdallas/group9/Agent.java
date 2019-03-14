@@ -12,30 +12,50 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.util.HashSet;
 
 public class Agent {
     public static void premain(String agentArgs, Instrumentation inst) {
-        String packageName = getPackage();
-        if (packageName.length() == 0)
+        HashSet<String> allPackages = getAllPackages();
+        String packageName = shortestPackage(allPackages);
+        if (packageName == null || packageName.length() == 0)
             System.out.println("Failed to read package name from pom.xml");
         else {
-            CoverageManager.getInstance().setProgramName(packageName);
+            CoverageManager.getInstance().setProgramName(getPackgeName());
             inst.addTransformer(new ClassTransformer(packageName));
         }
     }
 
-    private static String getPackage() {
-        File root = new File("src" + File.separator + "main" + File.separator + "java");
-        StringBuilder sb = new StringBuilder();
-
-        while (true) {
-            File[] list = root.listFiles();
-            if (list == null || list.length != 1) break;
-            sb.append(list[0].getName()).append('.');
-            root = list[0];
+    private static String shortestPackage(HashSet<String> packages) {
+        String result = null;
+        for (String packageName : packages) {
+            if (result == null || packageName.length() < result.length())
+                result = packageName;
         }
-        sb.deleteCharAt(sb.length() -1);
-        return sb.toString();
+
+        return result;
+    }
+
+    private static HashSet<String> getAllPackages() {
+        String prefix = "src" + File.separator + "main" + File.separator + "java";
+        File root = new File(prefix);
+        File[] list = root.listFiles();
+        HashSet<String> packages = new HashSet<>();
+        listAllPackages(list, packages, prefix);
+
+        return packages;
+    }
+
+    private static void listAllPackages(File[] files, HashSet<String> packages, String prefix) {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                listAllPackages(file.listFiles(), packages, prefix);
+            } else {
+                String path = file.getParent();
+                path = path.substring(path.lastIndexOf(prefix) + prefix.length() + 1);
+                packages.add(path);
+            }
+        }
     }
 
     private static String getPackgeName() {
@@ -56,10 +76,6 @@ public class Agent {
             if (nodeList == null || nodeList.getLength() == 0) return null;
             Node node = null;
             for (int i = 0; i < nodeList.getLength(); i++) {
-                if (nodeList.item(i).getNodeName().equals("groupId")) {
-                    node = nodeList.item(i);
-                    break;
-                }
                 if (nodeList.item(i).getNodeName().equals("groupId")) {
                     node = nodeList.item(i);
                     break;

@@ -11,8 +11,11 @@ class ClassTransformVisitor extends ClassVisitor implements Opcodes {
 
     private HashMap<String, MethodTransformVisitor> map = new HashMap<>();
 
-    public ClassTransformVisitor(final ClassVisitor cv) {
+    private String className;
+
+    public ClassTransformVisitor(final ClassVisitor cv, final String className) {
         super(Opcodes.ASM5, cv);
+        this.className = className.replaceAll("/", ".");
     }
 
     @Override
@@ -23,13 +26,13 @@ class ClassTransformVisitor extends ClassVisitor implements Opcodes {
         if (map.containsKey(name)) {
             MethodTransformVisitor transformer = map.get(name);
             HashSet<Integer> visitedLines = new HashSet<>(transformer.getVisitedLines());
-            MethodTransformVisitor newTransformer = new MethodTransformVisitor(mv, name);
+            MethodTransformVisitor newTransformer = new MethodTransformVisitor(mv, name, className);
             newTransformer.setVisitedLines(visitedLines);
             map.put(name, newTransformer);
             return newTransformer;
         }
         else {
-            MethodTransformVisitor transformer = new MethodTransformVisitor(mv, name);
+            MethodTransformVisitor transformer = new MethodTransformVisitor(mv, name, className);
             map.put(name, transformer);
             return transformer;
         }
