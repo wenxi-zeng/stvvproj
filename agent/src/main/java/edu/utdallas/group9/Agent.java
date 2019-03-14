@@ -15,13 +15,27 @@ import java.lang.instrument.Instrumentation;
 
 public class Agent {
     public static void premain(String agentArgs, Instrumentation inst) {
-        String packageName = getPackgeName();
-        if (packageName == null)
+        String packageName = getPackage();
+        if (packageName.length() == 0)
             System.out.println("Failed to read package name from pom.xml");
         else {
             CoverageManager.getInstance().setProgramName(packageName);
             inst.addTransformer(new ClassTransformer(packageName));
         }
+    }
+
+    private static String getPackage() {
+        File root = new File("src" + File.separator + "main" + File.separator + "java");
+        StringBuilder sb = new StringBuilder();
+
+        while (true) {
+            File[] list = root.listFiles();
+            if (list == null || list.length != 1) break;
+            sb.append(list[0].getName()).append('.');
+            root = list[0];
+        }
+        sb.deleteCharAt(sb.length() -1);
+        return sb.toString();
     }
 
     private static String getPackgeName() {
@@ -31,11 +45,21 @@ public class Agent {
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
             doc.getDocumentElement().normalize();
-
-            NodeList nodeList = doc.getFirstChild().getChildNodes();
+            NodeList rootList = doc.getChildNodes();
+            NodeList nodeList = null;
+            for (int i = 0; i < rootList.getLength(); i++) {
+                if (rootList.item(i).getNodeName().equals("project")) {
+                    nodeList = rootList.item(i).getChildNodes();
+                    break;
+                }
+            }
             if (nodeList == null || nodeList.getLength() == 0) return null;
             Node node = null;
             for (int i = 0; i < nodeList.getLength(); i++) {
+                if (nodeList.item(i).getNodeName().equals("groupId")) {
+                    node = nodeList.item(i);
+                    break;
+                }
                 if (nodeList.item(i).getNodeName().equals("groupId")) {
                     node = nodeList.item(i);
                     break;

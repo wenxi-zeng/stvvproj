@@ -133,7 +133,7 @@ public class AutoCoverageAgent {
     private static boolean updatePlugin(Document doc, NodeList plugins, String path) throws Exception {
         for (int j = 0; j < plugins.getLength(); j++) {
             Node plugin = plugins.item(j);
-            nodeToString(plugin);
+            //nodeToString(plugin);
             if (plugin.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) plugin;
                 NodeList artifacts = eElement.getElementsByTagName("artifactId");
