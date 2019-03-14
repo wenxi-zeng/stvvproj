@@ -22,13 +22,8 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
         super.visitLineNumber(i, label);
     }
 
-    @Override
-    public void visitLabel(Label label) {
-        record(line);
-        super.visitLabel(label);
-    }
-
     private void record(int line) {
+        if (line == 0) return;
         mv.visitLdcInsn(mName);
         mv.visitLdcInsn(new Integer(line));
         mv.visitMethodInsn(INVOKESTATIC, "edu/utdallas/group9/CoverageManager", "newStatementCoverage", "(Ljava/lang/String;I)V", false);
