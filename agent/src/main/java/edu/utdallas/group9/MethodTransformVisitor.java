@@ -12,8 +12,8 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
 	int line;
 	
     public MethodTransformVisitor(final MethodVisitor mv, String name) {
+	this.mName=name;
         super(Opcodes.ASM5, mv);
-        this.mName=name;
     }
 
     // method coverage collection
@@ -25,9 +25,14 @@ class MethodTransformVisitor extends MethodVisitor implements Opcodes {
 
     @Override
     public void visitLineNumber(int i, Label label) {
-        super.visitLineNumber(i, label);
-        line = i;
+        this.line = i;
+	    
         CoverageManager.getInstance().addStatementCoverage(mName, i);
+	mv.visitLdcInsn(mName);
+	mv.visitLdcInsn(new Integer(i));
+	mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+	mv.visitMethodInsn(INVOKESTATIC, "edu/utdallas/group9/CoverageManager", "addStatementCoverage", "(Ljava/lang/String;Ljava/lang/Integer;)V", false);
+	super.visitLineNumber(i, label);
     }
 
     @Override
