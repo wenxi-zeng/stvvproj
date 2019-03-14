@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -27,6 +28,7 @@ public class JUnitListener extends RunListener {
         super.testRunFinished(result);
         String dir = "logs";
         String logPath = dir + File.separator + manager.getProgramName() + ".txt";
+        ClassOutPut[] classOutputs;
         try {
             File directory = new File(dir);
             if (! directory.exists()){
@@ -37,11 +39,13 @@ public class JUnitListener extends RunListener {
             if (!file.exists())
                 file.createNewFile();
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (String caseName : manager.getCaseNames()) {
                 sb.append(caseName + "\n");
-                for (String outPutMsg : manager.getOutputMsgs(caseName)) {
-                    sb.append(outPutMsg);
+                classOutputs = manager.getOutputMsgs(caseName).toArray(new ClassOutPut[0]);
+                Arrays.sort(classOutputs);
+                for (ClassOutPut c : classOutputs) {
+                    sb.append(c.getOutPutMsg());
                 }
             }
             bw.write(sb.toString());

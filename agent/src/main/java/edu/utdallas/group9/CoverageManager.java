@@ -2,15 +2,16 @@ package edu.utdallas.group9;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public final class CoverageManager {
 
     private static volatile CoverageManager instance = null;
 
-    private HashMap<String, List<String>> hm;
+    private HashMap<String, HashSet<ClassOutPut>> hm;
     private String programName;
-    private List<String> currentOutputs;
+    private HashSet<ClassOutPut> currentOutputs;
 
     private CoverageManager() {
         hm = new HashMap<>();
@@ -29,7 +30,7 @@ public final class CoverageManager {
     }
 
     public void addStatementCoverage(String className, int lineNumber) {
-        currentOutputs.add(programName + "." + className + ":" + Integer.toString(lineNumber) + "\n");
+        currentOutputs.add(new ClassOutPut(programName, className, lineNumber));
     }
 
     public static void newStatementCoverage(String className, int lineNumber) {
@@ -45,7 +46,7 @@ public final class CoverageManager {
     }
 
     public void addCase(String caseName) {
-        hm.put(caseName, new ArrayList<>());
+        hm.put(caseName, new HashSet<>());
         currentOutputs = hm.get(caseName);
     }
 
@@ -53,7 +54,7 @@ public final class CoverageManager {
         return new ArrayList<>(hm.keySet());
     }
 
-    public List<String> getOutputMsgs(String caseName) {
+    public HashSet<ClassOutPut> getOutputMsgs(String caseName) {
         return hm.get(caseName);
     }
 
