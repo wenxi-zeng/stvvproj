@@ -29,7 +29,7 @@ public final class CoverageManager {
         return instance;
     }
 
-    public void addStatementCoverage(String className, int lineNumber) {
+    public static void addStatementCoverage(String className, int lineNumber) {
         currentOutputs.add(className + ":" + Integer.toString(lineNumber) + "\n");
     }
 
