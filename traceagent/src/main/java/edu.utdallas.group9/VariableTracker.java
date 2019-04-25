@@ -61,43 +61,45 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         String boolInternal = "I";
         String intInternal = "I";
 
-        if (desc.equals("Z")) {
-            opcode = Opcodes.ILOAD;
-            repType = "boolean";
-        }
-        else if (desc.equals("B")) {
-            opcode = Opcodes.ILOAD;
-            repType = "byte";
-        }
-        else if (desc.equals("C")) {
-            opcode = Opcodes.ILOAD;
-            repType = "char";
-        }
-        else if (desc.equals("S")) {
-            opcode = Opcodes.ILOAD;
-            repType = "short";
-        }
-        else if (desc.equals("I")) {
-            opcode = Opcodes.ILOAD;
-            repType = "int";
-        }
-        else if (desc.equals("J")) {
-            opcode = Opcodes.LLOAD;
-            repType = "long";
-        }
-        else if (desc.equals("F")) {
-            opcode = Opcodes.FLOAD;
-            repType = "float";
-        }
-        else if (desc.equals("D")) {
-            opcode = Opcodes.DLOAD;
-            repType = "double";
-        }
-        else {
-            opcode = Opcodes.ALOAD;
-            repType = desc;
-            hashcode = varType.getClassName().hashCode();
-            internalType = intInternal;
+        switch (desc) {
+            case "Z":
+                opcode = Opcodes.ILOAD;
+                repType = "boolean";
+                break;
+            case "B":
+                opcode = Opcodes.ILOAD;
+                repType = "byte";
+                break;
+            case "C":
+                opcode = Opcodes.ILOAD;
+                repType = "char";
+                break;
+            case "S":
+                opcode = Opcodes.ILOAD;
+                repType = "short";
+                break;
+            case "I":
+                opcode = Opcodes.ILOAD;
+                repType = "int";
+                break;
+            case "J":
+                opcode = Opcodes.LLOAD;
+                repType = "long";
+                break;
+            case "F":
+                opcode = Opcodes.FLOAD;
+                repType = "float";
+                break;
+            case "D":
+                opcode = Opcodes.DLOAD;
+                repType = "double";
+                break;
+            default:
+                opcode = Opcodes.ALOAD;
+                repType = desc;
+                hashcode = varType.getClassName().hashCode();
+                internalType = intInternal;
+                break;
         }
 
         //System.out.println("loop invoked before pull dict");
