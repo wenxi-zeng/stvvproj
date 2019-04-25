@@ -22,9 +22,9 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
 
     private boolean isStaticMethod;
 
-    private List<String> localVariableNames;
+    private String[] localVariableNames;
 
-    public VariableTracker(final MethodVisitor mv, String methodName, String methodDescriptor, String className, int access, List<String> localVariableNames) {
+    public VariableTracker(final MethodVisitor mv, String methodName, String methodDescriptor, String className, int access, String[] localVariableNames) {
         super(Opcodes.ASM5, mv);
         this.methodName = methodName;
         this.methodDescriptor = methodDescriptor;
@@ -41,7 +41,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         int offset = isStaticMethod ? 0 : 1;
         String varname;
         for (int i = 0; i < localVariableTypes.length; i++) {
-            varname = i + offset < localVariableNames.size() ? localVariableNames.get(i + offset) : "varname";
+            varname = localVariableNames != null ? localVariableNames[i + offset] : "varname";
             addEntry(localVariableTypes[i].getDescriptor(), varname, i + offset);
         }
         super.visitCode();

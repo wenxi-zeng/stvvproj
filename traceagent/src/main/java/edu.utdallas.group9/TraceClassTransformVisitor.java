@@ -34,13 +34,15 @@ public class TraceClassTransformVisitor extends ClassVisitor implements Opcodes 
     @Override
     public MethodVisitor visitMethod(final int access, final String name,
                                      final String desc, final String signature, final String[] exceptions) {
-        List<String> localVariableNames = new ArrayList<>();
+        String[] localVariableNames = null;
         for (final MethodNode mn : (List<MethodNode>)classNode.methods) {
-            if ( mn.name.equals(name))
-                System.out.println("mn.localVariables.size():" +  mn.localVariables.size());
-                for (LocalVariableNode n : (List<LocalVariableNode>)mn.localVariables) {
-                    localVariableNames.add(n.name);
+            if ( mn.name.equals(name)) {
+                //System.out.println("mn.localVariables.size():" +  mn.localVariables.size());
+                localVariableNames = new String[mn.localVariables.size()];
+                for (LocalVariableNode n : (List<LocalVariableNode>) mn.localVariables) {
+                    localVariableNames[n.index] = n.name;
                 }
+            }
         }
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
         return mv == null ? null : new VariableTracker(mv, name, desc, className, access, localVariableNames);
