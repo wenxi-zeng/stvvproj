@@ -25,26 +25,7 @@ public class TraceRunListener extends RunListener {
     @Override
     public void testRunFinished(Result result) throws Exception {
         super.testRunFinished(result);
-        String dir = "logs";
-        String logPath = dir + File.separator + "trace.dat";
-        try {
-            File directory = new File(dir);
-            if (! directory.exists()){
-                directory.mkdir();
-            }
-
-            File file = new File(logPath);
-            if (!file.exists())
-                file.createNewFile();
-
-            Writer writer = new FileWriter(logPath);
-            Gson gson = new GsonBuilder().create();
-            System.out.println("Traced entries: " + manager.getTracedEntries().size());
-            Thread.sleep(1000);
-            gson.toJson(manager.getTracedEntries(), writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        manager.save();
     }
 
     @Override
