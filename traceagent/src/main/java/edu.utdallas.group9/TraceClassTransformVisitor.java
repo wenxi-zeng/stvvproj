@@ -5,11 +5,11 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TraceClassTransformVisitor extends ClassVisitor implements Opcodes {
@@ -18,14 +18,17 @@ public class TraceClassTransformVisitor extends ClassVisitor implements Opcodes 
 
     private ClassNode classNode;
 
+    private List<FieldNode> fields;
+
     public TraceClassTransformVisitor(final ClassVisitor cv, final String className) {
         super(Opcodes.ASM5, cv);
-        this.className = className.replaceAll("/", ".");
+        this.className = className;
         this.classNode = new ClassNode();
 
         try {
             ClassReader reader = new ClassReader(className);
             reader.accept(classNode, 0);
+            this.fields = (List<FieldNode>)classNode.fields;
         } catch (IOException e) {
             System.out.println("Failed to load " + className);
         }
@@ -45,6 +48,6 @@ public class TraceClassTransformVisitor extends ClassVisitor implements Opcodes 
             }
         }
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        return mv == null ? null : new VariableTracker(mv, name, desc, className, access, localVariableNames);
+        return mv == null ? null : new VariableTracker(mv, name, desc, className, access, localVariableNames, fields);
     }
 }

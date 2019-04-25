@@ -1,8 +1,5 @@
 package edu.utdallas.group9;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -94,7 +91,7 @@ public class TraceManager {
             synchronized (queue) {
                 if (queue.isEmpty()) break;
                 List<TraceEntry> entries = queue.poll();
-                if (entries == null) continue;
+                if (entries == null || entries.size() == 0) continue;
                 writeToFile(entries);
             }
         }
