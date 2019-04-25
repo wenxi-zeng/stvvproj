@@ -1,16 +1,10 @@
 package edu.utdallas.group9;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,14 +15,12 @@ public class TraceManager {
     private String programName;
     private String currentTestcase;
     private ExecutorService executor;
-    private Queue<List<TraceEntry>> queue;
-    private int counter;
+    private final Queue<List<TraceEntry>> queue;
 
     private TraceManager() {
         traceEntries = new ArrayList<>();
         this.executor = Executors.newFixedThreadPool(8);
         queue = new LinkedList<>();
-        counter = 0;
     }
 
     public static TraceManager getInstance() {
@@ -44,19 +36,25 @@ public class TraceManager {
     }
 
     public void addDatum(String className, String methodName, String token, String var, String val, String type, boolean isField, boolean isDerived, int hashcode) {
-        if (traceEntries.size() > 1000) save();
+        synchronized (traceEntries) {
+            if (traceEntries.size() > 1000) {
+                queue.add(new ArrayList<>(traceEntries));
+                traceEntries.clear();
+                schedule();
+            }
+        }
 
         TraceEntry entry = new TraceEntry()
-                .withClassName(className)
-                .withMethodName(methodName)
-                .withToken(token)
-                .withTestCase(currentTestcase)
+                .withClassName(className == null ? "null" : className)
+                .withMethodName(methodName == null ? "null" : methodName)
+                .withToken(token == null ? "null" : token)
+                .withTestCase(currentTestcase == null ? "null" : currentTestcase)
                 .withDerived(isDerived)
                 .withHashcode(hashcode)
                 .withParameter(!isField)
-                .withVarName(var)
-                .withVarValue(val)
-                .withVarType(type);
+                .withVarName(var == null ? "null" : var)
+                .withVarValue(val == null ? "null" : val)
+                .withVarType(type == null ? "null" : type);
 
         traceEntries.add(entry);
     }
@@ -78,23 +76,33 @@ public class TraceManager {
         currentTestcase = caseName;
     }
 
-    public synchronized void save() {
-        counter++;
-        queue.add(new ArrayList<>(traceEntries));
-        traceEntries.clear();
+    public void complete() {
+        synchronized (traceEntries) {
+            queue.add(new ArrayList<>(traceEntries));
+            traceEntries.clear();
+        }
+
+        flush();
+    }
+
+    private void schedule() {
         executor.execute(this::flush);
     }
 
     private void flush() {
-        while (!queue.isEmpty()) {
-            List<TraceEntry> entries = queue.poll();
-            writeToFile(entries);
+        while (true) {
+            synchronized (queue) {
+                if (queue.isEmpty()) break;
+                List<TraceEntry> entries = queue.poll();
+                if (entries == null) continue;
+                writeToFile(entries);
+            }
         }
     }
 
     private void writeToFile(List<TraceEntry> entries) {
         String dir = "logs";
-        String logPath = dir + File.separator + "trace" + counter + ".dat";
+        String logPath = dir + File.separator + "trace" + UUID.randomUUID() + ".dat";
         try {
             File directory = new File(dir);
             if (! directory.exists()){
@@ -105,11 +113,21 @@ public class TraceManager {
             if (!file.exists())
                 file.createNewFile();
 
-            Writer writer = new FileWriter(logPath);
-            Gson gson = new GsonBuilder().create();
-            //System.out.println("Traced entries: " + entries.size());
-            gson.toJson(entries, writer);
-            writer.close();
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+//            //System.out.println("Traced entries: " + entries.size());
+//            objectMapper.writeValue(file, entries);
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            int i = 0;
+            for (; i < entries.size() - 1; i++) {
+                sb.append(entries.get(i).toString()).append(",");
+            }
+            sb.append(entries.get(i)).append("]");
+            bw.write(sb.toString());
+            bw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,15 +1,8 @@
 package edu.utdallas.group9;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 
 public class TraceRunListener extends RunListener {
 
@@ -25,7 +18,7 @@ public class TraceRunListener extends RunListener {
     @Override
     public void testRunFinished(Result result) throws Exception {
         super.testRunFinished(result);
-        manager.save();
+        manager.complete();
     }
 
     @Override
