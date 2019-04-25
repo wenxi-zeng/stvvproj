@@ -39,6 +39,8 @@ public class TraceRunListener extends RunListener {
 
             Writer writer = new FileWriter(logPath);
             Gson gson = new GsonBuilder().create();
+            System.out.println("Traced entries: " + manager.getTracedEntries().size());
+            Thread.sleep(1000);
             gson.toJson(manager.getTracedEntries(), writer);
         } catch (IOException e) {
             e.printStackTrace();
