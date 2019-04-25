@@ -5,6 +5,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.util.List;
 import java.util.UUID;
 
 public class VariableTracker extends MethodVisitor implements Opcodes {
@@ -21,7 +22,9 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
 
     private boolean isStaticMethod;
 
-    public VariableTracker(final MethodVisitor mv, String methodName, String methodDescriptor, String className, int access) {
+    private List<String> localVariableNames;
+
+    public VariableTracker(final MethodVisitor mv, String methodName, String methodDescriptor, String className, int access, List<String> localVariableNames) {
         super(Opcodes.ASM5, mv);
         this.methodName = methodName;
         this.methodDescriptor = methodDescriptor;
@@ -29,14 +32,17 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         this.access = access;
         this.counter = 0;
         this.isStaticMethod = (this.access & Opcodes.ACC_STATIC) != 0;
+        this.localVariableNames = localVariableNames;
     }
 
     @Override
     public void visitCode() {
         Type[] localVariableTypes = Type.getArgumentTypes(methodDescriptor);
         int offset = isStaticMethod ? 0 : 1;
+        String varname;
         for (int i = 0; i < localVariableTypes.length; i++) {
-            addEntry(localVariableTypes[i].getDescriptor(), "varname", i + offset);
+            varname = i + offset < localVariableNames.size() ? localVariableNames.get(i + offset) : "varname";
+            addEntry(localVariableTypes[i].getDescriptor(), varname, i + offset);
         }
         super.visitCode();
     }
@@ -95,11 +101,12 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
                 repType = "double";
                 break;
             default:
-                opcode = Opcodes.ALOAD;
-                repType = desc;
-                hashcode = varType.getClassName().hashCode();
-                internalType = intInternal;
-                break;
+//                opcode = Opcodes.ALOAD;
+//                repType = desc;
+//                hashcode = varType.getClassName().hashCode();
+//                internalType = intInternal;
+//                break;
+                return;
         }
 
         //System.out.println("loop invoked before pull dict");
@@ -122,7 +129,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         mv.visitLdcInsn(new Integer(0));
         mv.visitLdcInsn(new Integer(hashcode));
 
-        System.out.println("loop invoked");
+        //System.out.println("loop invoked");
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/utdallas/group9/TraceManager", "newDatum", "(" + strInternal
                                                                                                                 + strInternal
                                                                                                                 + strInternal
