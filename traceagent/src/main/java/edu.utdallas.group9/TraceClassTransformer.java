@@ -21,7 +21,7 @@ public class TraceClassTransformer implements ClassFileTransformer {
             org.objectweb.asm.ClassWriter cw = new org.objectweb.asm.ClassWriter(ClassWriter.COMPUTE_FRAMES);
             TraceClassTransformVisitor ca = new TraceClassTransformVisitor(cw, className);
             cr.accept(ca, 0);
-            System.out.println("================================From package");
+            //System.out.println("================================From package");
             return cw.toByteArray();
         }
 

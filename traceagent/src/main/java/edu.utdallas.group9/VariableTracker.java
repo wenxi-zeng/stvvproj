@@ -52,7 +52,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
     private void addEntry(String desc, String varName, int index) {
         Type varType = Type.getObjectType(desc);
         String token = UUID.randomUUID().toString();
-        System.out.println("desc: " + desc + ", varType:" + varType.getInternalName());
+        //System.out.println("desc: " + desc + ", varType:" + varType.getInternalName());
         int opcode;
         int hashcode = 0;
         String repType;
@@ -100,7 +100,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             internalType = intInternal;
         }
 
-        System.out.println("loop invoked before pull dict");
+        //System.out.println("loop invoked before pull dict");
         mv.visitLdcInsn(className);
         mv.visitLdcInsn(methodName);
         mv.visitLdcInsn(token);
@@ -131,6 +131,6 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
                                                                                                                 + boolInternal
                                                                                                                 + intInternal + ")V", false);
 
-        System.out.println("loop invoked 2");
+        //System.out.println("loop invoked 2");
     }
 }

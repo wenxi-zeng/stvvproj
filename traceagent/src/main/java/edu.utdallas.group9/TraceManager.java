@@ -60,6 +60,6 @@ public class TraceManager {
     }
 
     public List<TraceEntry> getTracedEntries (){
-        return traceEntries;
+        return new ArrayList<>(traceEntries);
     }
 }
