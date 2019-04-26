@@ -12,6 +12,8 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
 
     private String methodName;
 
+    private String methodSignature;
+
     private String className;
 
     private String rawClassName;
@@ -43,6 +45,13 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             this.fields = new FieldNode[fields.size()];
             this.fields = fields.toArray(this.fields);
         }
+        StringBuilder parameters = new StringBuilder().append(methodName).append("(");
+        for (int i = 0; i < fields.size(); i++) {
+            this.fields[i] = fields.get(i);
+            parameters.append(this.fields[i].desc).append(" ");
+        }
+        parameters.append(")");
+        this.methodSignature =  parameters.toString();
     }
 
     @Override
@@ -71,10 +80,12 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         int opcode;
         int hashcode = 0;
         String repType;
-        String internalType = fieldNode.desc;
+        String toStringType = fieldNode.desc;
         String strInternal = "L" + Type.getInternalName(String.class) + ";";
         String boolInternal = "I";
         String intInternal = "I";
+        String fieldMethodName = "field";
+        //String charInternal = "C";
 
         switch (fieldNode.desc) {
             case "Z":
@@ -84,6 +95,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             case "B":
                 opcode = Opcodes.ILOAD;
                 repType = "byte";
+                toStringType = intInternal;
                 break;
             case "C":
                 opcode = Opcodes.ILOAD;
@@ -92,6 +104,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             case "S":
                 opcode = Opcodes.ILOAD;
                 repType = "short";
+                toStringType = intInternal;
                 break;
             case "I":
                 opcode = Opcodes.ILOAD;
@@ -110,15 +123,16 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
                 repType = "double";
                 break;
             default:
-                opcode = Opcodes.ALOAD;
-                repType = fieldNode.desc;
-                hashcode = fieldNode.desc.hashCode();
-                internalType = intInternal;
-                break;
+//                opcode = Opcodes.ALOAD;
+//                repType = fieldNode.desc;
+//                hashcode = fieldNode.desc.hashCode();
+//                internalType = intInternal;
+//                break;
+                return;
         }
 
         mv.visitLdcInsn(className);
-        mv.visitLdcInsn(methodName);
+        mv.visitLdcInsn(fieldMethodName);
         mv.visitLdcInsn(token);
         mv.visitLdcInsn(fieldNode.name);
 
@@ -136,7 +150,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
                 //System.out.println("mv.visitFieldInsn(Opcodes.GETFIELD, " + rawClassName + " , " + fieldNode.name + ", " + fieldNode.desc + ") method: " + methodName + ", value: " + fieldNode.value);
                 mv.visitFieldInsn(Opcodes.GETFIELD, rawClassName, fieldNode.name, fieldNode.desc);
             }
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + internalType + ")" + strInternal, false);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + toStringType + ")" + strInternal, false);
         }
 
         mv.visitLdcInsn(repType);
@@ -161,7 +175,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         int opcode;
         int hashcode = 0;
         String repType;
-        String internalType = desc;
+        String toStringType = desc;
         String strInternal = "L" + Type.getInternalName(String.class) + ";";
         String boolInternal = "I";
         String intInternal = "I";
@@ -174,6 +188,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             case "B":
                 opcode = Opcodes.ILOAD;
                 repType = "byte";
+                toStringType = intInternal;
                 break;
             case "C":
                 opcode = Opcodes.ILOAD;
@@ -182,6 +197,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             case "S":
                 opcode = Opcodes.ILOAD;
                 repType = "short";
+                toStringType = intInternal;
                 break;
             case "I":
                 opcode = Opcodes.ILOAD;
@@ -200,15 +216,17 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
                 repType = "double";
                 break;
             default:
-                opcode = Opcodes.ALOAD;
-                repType = desc;
-                hashcode = desc.hashCode();
-                internalType = intInternal;
-                break;
+//                opcode = Opcodes.ALOAD;
+//                repType = desc;
+//                hashcode = desc.hashCode();
+//                internalType = intInternal;
+//                break;
+
+                return;
         }
 
         mv.visitLdcInsn(className);
-        mv.visitLdcInsn(methodName);
+        mv.visitLdcInsn(methodSignature);
         mv.visitLdcInsn(token);
         mv.visitLdcInsn(varName);
 
@@ -218,7 +236,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         }
         else {
             mv.visitVarInsn(opcode, index);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + internalType + ")" + strInternal, false);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + toStringType + ")" + strInternal, false);
         }
 
         mv.visitLdcInsn(repType);

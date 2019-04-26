@@ -125,7 +125,8 @@ public class TraceManager {
             sb.append("[");
             int i = 0;
             for (; i < entries.size() - 1; i++) {
-                sb.append(entries.get(i).toString()).append(",");
+                if (entries.get(i) != null)
+                    sb.append(entries.get(i).toString()).append(",");
             }
             sb.append(entries.get(i)).append("]");
             bw.write(sb.toString());
