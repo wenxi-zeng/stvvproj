@@ -13,11 +13,13 @@ public class TraceManager {
     private String currentTestcase;
     private ExecutorService executor;
     private final Queue<List<TraceEntry>> queue;
+    private int total;
 
     private TraceManager() {
         traceEntries = new ArrayList<>();
         this.executor = Executors.newFixedThreadPool(8);
         queue = new LinkedList<>();
+        total = 0;
     }
 
     public static TraceManager getInstance() {
@@ -35,6 +37,7 @@ public class TraceManager {
     public void addDatum(String className, String methodName, String token, String var, String val, String type, boolean isField, boolean isDerived, int hashcode) {
         synchronized (traceEntries) {
             if (traceEntries.size() > 1000) {
+                total += traceEntries.size();
                 queue.add(new ArrayList<>(traceEntries));
                 traceEntries.clear();
                 schedule();
@@ -75,11 +78,13 @@ public class TraceManager {
 
     public void complete() {
         synchronized (traceEntries) {
+            total += traceEntries.size();
             queue.add(new ArrayList<>(traceEntries));
             traceEntries.clear();
         }
 
         flush();
+        System.out.println("Total traced entries: " + total);
     }
 
     private void schedule() {

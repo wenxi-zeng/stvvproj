@@ -55,27 +55,27 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         Type[] localVariableTypes = Type.getArgumentTypes(methodDescriptor);
         int offset = isStaticMethod ? 0 : 1;
 
-        for (FieldNode field : fields) {
-//            System.out.println("fields[i].name: " + field.name);
-            addEntry(field.desc, field.name, -1, true);
-        }
-
         String varname;
         for (int i = 0; i < localVariableTypes.length; i++) {
             varname = localVariableNames != null ? localVariableNames[i + offset] : "varname";
-            addEntry(localVariableTypes[i].getDescriptor(), varname, i + offset, false);
+            addLocalVariable(localVariableTypes[i].getDescriptor(), varname, i + offset);
         }
         super.visitCode();
+
+//        for (FieldNode field : fields) {
+//            //System.out.println("field.desc: " + field.desc + ", field.name" + field.name);
+//            addEntry(field.access, field.desc, field.name, -1, true);
+//        }
     }
 
-    private void addEntry(String desc, String varName, int index, boolean isField) {
-        Type varType = Type.getObjectType(desc);
+
+
+    private void addLocalVariable(String desc, String varName, int index) {
         String token = UUID.randomUUID().toString();
-        //if (isField) System.out.println("desc: " + desc + ", varType:" + varType.getInternalName());
         int opcode;
         int hashcode = 0;
         String repType;
-        String internalType = varType.getInternalName();
+        String internalType = desc;
         String strInternal = "L" + Type.getInternalName(String.class) + ";";
         String boolInternal = "I";
         String intInternal = "I";
@@ -116,12 +116,11 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             default:
                 opcode = Opcodes.ALOAD;
                 repType = desc;
-                hashcode = varType.getClassName().hashCode();
+                hashcode = desc.hashCode();
                 internalType = intInternal;
                 break;
         }
 
-        //System.out.println("loop invoked before pull dict");
         mv.visitLdcInsn(className);
         mv.visitLdcInsn(methodName);
         mv.visitLdcInsn(token);
@@ -131,21 +130,16 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             String temp = "hashcode";
             mv.visitLdcInsn(temp);
         }
-        else if (isField) {
-            mv.visitFieldInsn(opcode, rawClassName, varName, desc);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + internalType + ")" + strInternal, false);
-        }
         else {
             mv.visitVarInsn(opcode, index);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + internalType + ")" + strInternal, false);
         }
 
         mv.visitLdcInsn(repType);
-        mv.visitLdcInsn(new Integer(isField ? 1 : 0));
+        mv.visitLdcInsn(new Integer(00));
         mv.visitLdcInsn(new Integer(0));
         mv.visitLdcInsn(new Integer(hashcode));
 
-        //System.out.println("loop invoked");
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/utdallas/group9/TraceManager", "newDatum", "(" + strInternal
                                                                                                                 + strInternal
                                                                                                                 + strInternal
@@ -156,6 +150,5 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
                                                                                                                 + boolInternal
                                                                                                                 + intInternal + ")V", false);
 
-        //System.out.println("loop invoked 2");
     }
 }
