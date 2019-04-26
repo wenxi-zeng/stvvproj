@@ -39,19 +39,20 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         this.isStaticMethod = (this.access & Opcodes.ACC_STATIC) != 0;
         this.localVariableNames = localVariableNames;
 
-        int offset = isStaticMethod ? 0 : 1;
-        int counter = 0;
-        this.fields = new FieldNode[localVariableNames.length - offset];
-        for (FieldNode node : fields) {
-            if (isStaticMethod)
-                this.fields[counter++] = node;
-            else if (!node.name.equals("this$0"))
-                this.fields[counter++] = node;
+        if (fields != null) {
+            this.fields = new FieldNode[fields.size()];
+            this.fields = fields.toArray(this.fields);
         }
     }
 
     @Override
     public void visitCode() {
+        if (fields != null) {
+            for (FieldNode field : fields) {
+                addField(field);
+            }
+        }
+
         Type[] localVariableTypes = Type.getArgumentTypes(methodDescriptor);
         int offset = isStaticMethod ? 0 : 1;
 
@@ -60,15 +61,100 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             varname = localVariableNames != null ? localVariableNames[i + offset] : "varname";
             addLocalVariable(localVariableTypes[i].getDescriptor(), varname, i + offset);
         }
-        super.visitCode();
 
-//        for (FieldNode field : fields) {
-//            //System.out.println("field.desc: " + field.desc + ", field.name" + field.name);
-//            addEntry(field.access, field.desc, field.name, -1, true);
-//        }
+        super.visitCode();
     }
 
+    private void addField(FieldNode fieldNode) {
+        if (isStaticMethod || methodName.equals("<init>")) return;
+        String token = UUID.randomUUID().toString();
+        int opcode;
+        int hashcode = 0;
+        String repType;
+        String internalType = fieldNode.desc;
+        String strInternal = "L" + Type.getInternalName(String.class) + ";";
+        String boolInternal = "I";
+        String intInternal = "I";
 
+        switch (fieldNode.desc) {
+            case "Z":
+                opcode = Opcodes.ILOAD;
+                repType = "boolean";
+                break;
+            case "B":
+                opcode = Opcodes.ILOAD;
+                repType = "byte";
+                break;
+            case "C":
+                opcode = Opcodes.ILOAD;
+                repType = "char";
+                break;
+            case "S":
+                opcode = Opcodes.ILOAD;
+                repType = "short";
+                break;
+            case "I":
+                opcode = Opcodes.ILOAD;
+                repType = "int";
+                break;
+            case "J":
+                opcode = Opcodes.LLOAD;
+                repType = "long";
+                break;
+            case "F":
+                opcode = Opcodes.FLOAD;
+                repType = "float";
+                break;
+            case "D":
+                opcode = Opcodes.DLOAD;
+                repType = "double";
+                break;
+            default:
+                opcode = Opcodes.ALOAD;
+                repType = fieldNode.desc;
+                hashcode = fieldNode.desc.hashCode();
+                internalType = intInternal;
+                break;
+        }
+
+        mv.visitLdcInsn(className);
+        mv.visitLdcInsn(methodName);
+        mv.visitLdcInsn(token);
+        mv.visitLdcInsn(fieldNode.name);
+
+        if (opcode == Opcodes.ALOAD) {
+            String temp = "hashcode";
+            mv.visitLdcInsn(temp);
+        }
+        else {
+            boolean isStaticField = (fieldNode.access & Opcodes.ACC_STATIC) != 0;
+            if (isStaticField) {
+                mv.visitFieldInsn(Opcodes.GETSTATIC, rawClassName, fieldNode.name, fieldNode.desc);
+            }
+            else {
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                //System.out.println("mv.visitFieldInsn(Opcodes.GETFIELD, " + rawClassName + " , " + fieldNode.name + ", " + fieldNode.desc + ") method: " + methodName + ", value: " + fieldNode.value);
+                mv.visitFieldInsn(Opcodes.GETFIELD, rawClassName, fieldNode.name, fieldNode.desc);
+            }
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, strInternal, "valueOf", "(" + internalType + ")" + strInternal, false);
+        }
+
+        mv.visitLdcInsn(repType);
+        mv.visitLdcInsn(new Integer(1));
+        mv.visitLdcInsn(new Integer(0));
+        mv.visitLdcInsn(new Integer(hashcode));
+
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/utdallas/group9/TraceManager", "newDatum", "(" + strInternal
+                + strInternal
+                + strInternal
+                + strInternal
+                + strInternal
+                + strInternal
+                + boolInternal
+                + boolInternal
+                + intInternal + ")V", false);
+
+    }
 
     private void addLocalVariable(String desc, String varName, int index) {
         String token = UUID.randomUUID().toString();
@@ -136,7 +222,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         }
 
         mv.visitLdcInsn(repType);
-        mv.visitLdcInsn(new Integer(00));
+        mv.visitLdcInsn(new Integer(0));
         mv.visitLdcInsn(new Integer(0));
         mv.visitLdcInsn(new Integer(hashcode));
 
