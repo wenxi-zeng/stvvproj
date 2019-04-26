@@ -232,13 +232,13 @@ public class TraceEntry implements Serializable
 
     @Override
     public String toString() {
-        return new StringBuilder().append("{").append("\"token\":\"").append(token.isEmpty() ? " " : token).append("\",")
-                                                .append("\"className\":\"").append(className.isEmpty() ? " " : className).append("\",")
-                                                .append("\"methodName\":\"").append(methodName.isEmpty() ? " " : methodName).append("\",")
-                                                .append("\"testCase\":\"").append(testCase.isEmpty() ? " " : testCase).append("\",")
-                                                .append("\"varName\":\"").append(varName.isEmpty() ? " " : varName).append("\",")
-                                                .append("\"varValue\":\"").append(varValue.isEmpty() ? " " : varValue).append("\",")
-                                                .append("\"varType\":\"").append(varType.isEmpty() ? " " : varType).append("\",")
+        return new StringBuilder().append("{").append("\"token\":\"").append(token.replaceAll("\"", "\\")).append("\",")
+                                                .append("\"className\":\"").append(className.replaceAll("\"", "\\")).append("\",")
+                                                .append("\"methodName\":\"").append(methodName.replaceAll("\"", "\\")).append("\",")
+                                                .append("\"testCase\":\"").append(testCase.replaceAll("\"", "\\")).append("\",")
+                                                .append("\"varName\":\"").append(varName.replaceAll("\"", "\\")).append("\",")
+                                                .append("\"varValue\":\"").append(varValue.replaceAll("\"", "\\")).append("\",")
+                                                .append("\"varType\":\"").append(varType.replaceAll("\"", "\\")).append("\",")
                                                 .append("\"parameter\":").append(parameter).append(",")
                                                 .append("\"derived\":").append(derived).append(",")
                                                 .append("\"hashcode\":").append(hashcode).append("}").toString();
