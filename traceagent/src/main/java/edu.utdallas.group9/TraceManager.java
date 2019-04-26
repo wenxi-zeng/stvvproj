@@ -1,5 +1,7 @@
 package edu.utdallas.group9;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -115,9 +117,9 @@ public class TraceManager {
             if (!file.exists())
                 file.createNewFile();
 
-//            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new ObjectMapper();
 //            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-//            //System.out.println("Traced entries: " + entries.size());
+//            System.out.println("Traced entries: " + entries.size());
 //            objectMapper.writeValue(file, entries);
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
@@ -126,9 +128,9 @@ public class TraceManager {
             int i = 0;
             for (; i < entries.size() - 1; i++) {
                 if (entries.get(i) != null)
-                    sb.append(entries.get(i).toString()).append(",");
+                    sb.append(objectMapper.writeValueAsString(entries.get(i))).append(",");
             }
-            sb.append(entries.get(i)).append("]");
+            sb.append(objectMapper.writeValueAsString(entries.get(i))).append("]");
             bw.write(sb.toString());
             bw.close();
         } catch (IOException e) {

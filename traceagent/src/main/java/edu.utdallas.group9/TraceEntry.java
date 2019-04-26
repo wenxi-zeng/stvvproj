@@ -232,16 +232,16 @@ public class TraceEntry implements Serializable
 
     @Override
     public String toString() {
-        return new StringBuilder().append("{").append("\"token\":\"").append(token.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"className\":\"").append(className.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"methodName\":\"").append(methodName.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"testCase\":\"").append(testCase.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"varName\":\"").append(varName.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"varValue\":\"").append(varValue.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"varType\":\"").append(varType.replaceAll("\"", "\\")).append("\",")
-                                                .append("\"parameter\":").append(parameter).append(",")
-                                                .append("\"derived\":").append(derived).append(",")
-                                                .append("\"hashcode\":").append(hashcode).append("}").toString();
+        return new StringBuilder().append("{").append("\"token\":\"").append(token).append("\",")
+                .append("\"className\":\"").append(className).append("\",")
+                .append("\"methodName\":\"").append(methodName).append("\",")
+                .append("\"testCase\":\"").append(testCase).append("\",")
+                .append("\"varName\":\"").append(varName).append("\",")
+                .append("\"varValue\":\"").append(varValue).append("\",")
+                .append("\"varType\":\"").append(varType).append("\",")
+                .append("\"parameter\":").append(parameter).append(",")
+                .append("\"derived\":").append(derived).append(",")
+                .append("\"hashcode\":").append(hashcode).append("}").toString();
     }
 
     @Override

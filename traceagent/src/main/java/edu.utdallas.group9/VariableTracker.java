@@ -12,7 +12,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
 
     private String methodName;
 
-    private String methodSignature;
+//    private String methodSignature;
 
     private String className;
 
@@ -45,13 +45,13 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
             this.fields = new FieldNode[fields.size()];
             this.fields = fields.toArray(this.fields);
         }
-        StringBuilder parameters = new StringBuilder().append(methodName).append("(");
-        for (int i = 0; i < fields.size(); i++) {
-            this.fields[i] = fields.get(i);
-            parameters.append(this.fields[i].desc).append(" ");
-        }
-        parameters.append(")");
-        this.methodSignature =  parameters.toString();
+//        StringBuilder parameters = new StringBuilder().append(methodName).append("(");
+//        for (int i = 0; i < fields.size(); i++) {
+//            this.fields[i] = fields.get(i);
+//            parameters.append(this.fields[i].desc).append(" ");
+//        }
+//        parameters.append(")");
+//        this.methodSignature =  parameters.toString();
     }
 
     @Override
@@ -226,7 +226,7 @@ public class VariableTracker extends MethodVisitor implements Opcodes {
         }
 
         mv.visitLdcInsn(className);
-        mv.visitLdcInsn(methodSignature);
+        mv.visitLdcInsn(methodName);
         mv.visitLdcInsn(token);
         mv.visitLdcInsn(varName);
 
