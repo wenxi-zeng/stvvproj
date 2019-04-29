@@ -11,6 +11,8 @@
     <modules>
         <module>AutoCoverageAgent</module>
         <module>Agent</module>
+        <module>traceagent</module>
+        <module>autotraceagent</module>
     </modules>
     <dependencies>
         <dependency>
